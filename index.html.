@@ -1,122 +1,229 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nivel 1</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nivel 1</title>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    height: 100vh;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    font-family: 'Press Start 2P', monospace;
-}
-
-/* efecto de interferencia */
-body::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0,255,0,0.05) 0px,
-        rgba(0,255,0,0.05) 2px,
-        transparent 2px,
-        transparent 4px
-    );
-    animation: glitch 0.2s infinite;
-}
-
-@keyframes glitch {
-    0% {
-        transform: translate(0);
+  <style>
+    * {
+      box-sizing: border-box;
     }
-    50% {
-        transform: translate(2px,-2px);
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #000;
+      color: #00ff66;
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
     }
-    100% {
-        transform: translate(0);
+
+    .pantalla {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
     }
-}
 
-.container {
-    color: #00ff66;
-    text-align: center;
-    z-index: 1;
-    text-shadow:
-        0 0 5px #00ff66,
-        0 0 15px #00ff66;
-}
+    .oculto {
+      display: none;
+    }
 
-h1 {
-    font-size: 35px;
-    margin-bottom: 40px;
-}
+    h1 {
+      font-size: clamp(28px, 8vw, 60px);
+      margin: 10px;
+      text-shadow: 0 0 8px #00ff66;
+    }
 
-#texto {
-    font-size: 18px;
-    min-height: 30px;
-}
+    p {
+      font-size: clamp(16px, 4vw, 26px);
+      text-shadow: 0 0 6px #00ff66;
+    }
 
-.cursor {
-    display: inline-block;
-    width: 12px;
-    height: 20px;
-    background: #00ff66;
-    animation: parpadear 0.7s infinite;
-}
+    button {
+      background: #000;
+      color: #00ff66;
+      border: 2px solid #00ff66;
+      padding: 14px 35px;
+      margin: 10px;
+      font-family: "Courier New", monospace;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      text-shadow: 0 0 5px #00ff66;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+    }
 
-@keyframes parpadear {
-    50% {
+    button:hover {
+      background: #00ff66;
+      color: #000;
+      box-shadow: 0 0 20px #00ff66;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 22px;
+      background: #00ff66;
+      margin-left: 5px;
+      animation: parpadear 0.8s infinite;
+    }
+
+    @keyframes parpadear {
+      50% {
         opacity: 0;
+      }
     }
-}
-</style>
 
+    .interferencia {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        #00ff66 4px
+      );
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <div class="interferencia"></div>
 
-<h1>NIVEL 1</h1>
+  <!-- PANTALLA 1 -->
+  <section id="inicio" class="pantalla">
+    <h1 id="textoInicio"></h1>
+    <p id="subtexto"></p>
+    <span class="cursor"></span>
+  </section>
 
-<div id="texto"></div><span class="cursor"></span>
+  <!-- PANTALLA 2 -->
+  <section id="comenzar" class="pantalla oculto">
+    <h1>NIVEL 1</h1>
+    <p>El sistema está listo.</p>
 
-</div>
+    <button onclick="mostrarPregunta()">
+      COMENZAR
+    </button>
+  </section>
 
+  <!-- PANTALLA 3 -->
+  <section id="pregunta" class="pantalla oculto">
+    <h1>¿QUIERES COMENZAR?</h1>
 
-<script>
+    <div>
+      <button onclick="aceptar()">SÍ</button>
+      <button onclick="rechazar()">NO</button>
+    </div>
 
-const mensaje = "INICIANDO SISTEMA...";
-let i = 0;
+    <p id="respuesta"></p>
+  </section>
 
-function escribir() {
+  <!-- PANTALLA 4 -->
+  <section id="juego" class="pantalla oculto">
+    <h1>JUEGO INICIADO</h1>
+    <p>Bienvenido al Nivel 1...</p>
 
-    if (i < mensaje.length) {
-        document.getElementById("texto").innerHTML += mensaje.charAt(i);
+    <button onclick="alternarMusica()" id="musicaBtn">
+      🔊 MÚSICA
+    </button>
+  </section>
+
+  <!--
+    AQUÍ PONDREMOS LA MÚSICA.
+
+    Cuando tengas el archivo de audio, lo pondremos
+    en esta parte.
+  -->
+
+  <audio id="musica" loop>
+    <source src="musica.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+
+    const texto = "NIVEL 1";
+    const subtitulo = "INICIANDO JUEGO...";
+
+    let i = 0;
+    let j = 0;
+
+    function escribirTitulo() {
+      if (i < texto.length) {
+        document.getElementById("textoInicio").textContent += texto.charAt(i);
         i++;
-        setTimeout(escribir, 100);
+        setTimeout(escribirTitulo, 120);
+      } else {
+        setTimeout(escribirSubtitulo, 500);
+      }
     }
 
-}
+    function escribirSubtitulo() {
+      if (j < subtitulo.length) {
+        document.getElementById("subtexto").textContent += subtitulo.charAt(j);
+        j++;
+        setTimeout(escribirSubtitulo, 70);
+      } else {
+        setTimeout(() => {
+          document.getElementById("inicio").classList.add("oculto");
+          document.getElementById("comenzar").classList.remove("oculto");
+        }, 1500);
+      }
+    }
 
-escribir();
+    function mostrarPregunta() {
+      document.getElementById("comenzar").classList.add("oculto");
+      document.getElementById("pregunta").classList.remove("oculto");
+    }
 
-</script>
+    function aceptar() {
+      const musica = document.getElementById("musica");
+
+      musica.play().catch(() => {
+        console.log("La música necesita interacción del usuario.");
+      });
+
+      document.getElementById("pregunta").classList.add("oculto");
+      document.getElementById("juego").classList.remove("oculto");
+    }
+
+    function rechazar() {
+      document.getElementById("respuesta").textContent =
+        "Está bien... todavía puedes pensarlo.";
+
+      setTimeout(() => {
+        document.getElementById("respuesta").textContent = "";
+      }, 2000);
+    }
+
+    function alternarMusica() {
+      const musica = document.getElementById("musica");
+      const boton = document.getElementById("musicaBtn");
+
+      if (musica.paused) {
+        musica.play();
+        boton.textContent = "🔊 MÚSICA";
+      } else {
+        musica.pause();
+        boton.textContent = "🔇 MÚSICA";
+      }
+    }
+
+    escribirTitulo();
+
+  </script>
 
 </body>
 </html>
