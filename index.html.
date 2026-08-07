@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nivel 1</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* efecto de interferencia */
+body::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0,255,0,0.05) 0px,
+        rgba(0,255,0,0.05) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+    animation: glitch 0.2s infinite;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+    50% {
+        transform: translate(2px,-2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+.container {
+    color: #00ff66;
+    text-align: center;
+    z-index: 1;
+    text-shadow:
+        0 0 5px #00ff66,
+        0 0 15px #00ff66;
+}
+
+h1 {
+    font-size: 35px;
+    margin-bottom: 40px;
+}
+
+#texto {
+    font-size: 18px;
+    min-height: 30px;
+}
+
+.cursor {
+    display: inline-block;
+    width: 12px;
+    height: 20px;
+    background: #00ff66;
+    animation: parpadear 0.7s infinite;
+}
+
+@keyframes parpadear {
+    50% {
+        opacity: 0;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>NIVEL 1</h1>
+
+<div id="texto"></div><span class="cursor"></span>
+
+</div>
+
+
+<script>
+
+const mensaje = "INICIANDO SISTEMA...";
+let i = 0;
+
+function escribir() {
+
+    if (i < mensaje.length) {
+        document.getElementById("texto").innerHTML += mensaje.charAt(i);
+        i++;
+        setTimeout(escribir, 100);
+    }
+
+}
+
+escribir();
+
+</script>
+
+</body>
+</html>
