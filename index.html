@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nivel 1</title>
+  <title>MEMORY.LOG</title>
 
   <style>
     * {
@@ -95,6 +95,13 @@
         #00ff66 4px
       );
     }
+
+    #activar {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: #000;
+    }
   </style>
 </head>
 
@@ -102,8 +109,15 @@
 
   <div class="interferencia"></div>
 
+  <!-- PANTALLA PARA ACTIVAR EL SONIDO -->
+  <section id="activar" class="pantalla">
+    <h1>MEMORY.LOG</h1>
+    <p>TOCA PARA INICIAR</p>
+    <span class="cursor"></span>
+  </section>
+
   <!-- PANTALLA 1 -->
-  <section id="inicio" class="pantalla">
+  <section id="inicio" class="pantalla oculto">
     <h1 id="textoInicio"></h1>
     <p id="subtexto"></p>
     <span class="cursor"></span>
@@ -135,95 +149,237 @@
   <section id="juego" class="pantalla oculto">
     <h1>JUEGO INICIADO</h1>
     <p>Bienvenido al Nivel 1...</p>
-
-    <button onclick="alternarMusica()" id="musicaBtn">
-      🔊 MÚSICA
-    </button>
   </section>
 
-  <!--
-    AQUÍ PONDREMOS LA MÚSICA.
-
-    Cuando tengas el archivo de audio, lo pondremos
-    en esta parte.
-  -->
-
-  <audio id="musica" loop>
-    <source src="musica.mp3" type="audio/mpeg">
-  </audio>
 
   <script>
 
+    let audioContext;
+
+    /*
+      ACTIVAR EL AUDIO
+    */
+
+    function iniciarAudio() {
+
+      audioContext = new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+    }
+
+
+    /*
+      SONIDO DE TECLADO ANTIGUO
+      Volumen reducido para que sea más suave.
+    */
+
+    function sonidoTecla() {
+
+      if (!audioContext) return;
+
+      const oscillator =
+        audioContext.createOscillator();
+
+      const gain =
+        audioContext.createGain();
+
+      oscillator.type = "square";
+
+      oscillator.frequency.setValueAtTime(
+        450 + Math.random() * 150,
+        audioContext.currentTime
+      );
+
+      gain.gain.setValueAtTime(
+        0.025,
+        audioContext.currentTime
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + 0.06
+      );
+
+      oscillator.connect(gain);
+
+      gain.connect(
+        audioContext.destination
+      );
+
+      oscillator.start();
+
+      oscillator.stop(
+        audioContext.currentTime + 0.06
+      );
+    }
+
+
+    /*
+      TEXTO QUE APARECE LETRA POR LETRA
+    */
+
     const texto = "NIVEL 1";
-    const subtitulo = "INICIANDO JUEGO...";
+
+    const subtitulo =
+      "INICIANDO JUEGO...";
 
     let i = 0;
     let j = 0;
 
+
     function escribirTitulo() {
+
       if (i < texto.length) {
-        document.getElementById("textoInicio").textContent += texto.charAt(i);
+
+        document.getElementById(
+          "textoInicio"
+        ).textContent +=
+          texto.charAt(i);
+
+        sonidoTecla();
+
         i++;
-        setTimeout(escribirTitulo, 120);
+
+        setTimeout(
+          escribirTitulo,
+          140
+        );
+
       } else {
-        setTimeout(escribirSubtitulo, 500);
+
+        setTimeout(
+          escribirSubtitulo,
+          500
+        );
       }
     }
 
+
     function escribirSubtitulo() {
+
       if (j < subtitulo.length) {
-        document.getElementById("subtexto").textContent += subtitulo.charAt(j);
+
+        document.getElementById(
+          "subtexto"
+        ).textContent +=
+          subtitulo.charAt(j);
+
+        sonidoTecla();
+
         j++;
-        setTimeout(escribirSubtitulo, 70);
+
+        setTimeout(
+          escribirSubtitulo,
+          80
+        );
+
       } else {
+
         setTimeout(() => {
-          document.getElementById("inicio").classList.add("oculto");
-          document.getElementById("comenzar").classList.remove("oculto");
+
+          document.getElementById(
+            "inicio"
+          ).classList.add("oculto");
+
+          document.getElementById(
+            "comenzar"
+          ).classList.remove("oculto");
+
         }, 1500);
       }
     }
 
-    function mostrarPregunta() {
-      document.getElementById("comenzar").classList.add("oculto");
-      document.getElementById("pregunta").classList.remove("oculto");
+
+    /*
+      EMPEZAR EL JUEGO
+    */
+
+    function empezarJuego() {
+
+      iniciarAudio();
+
+      document.getElementById(
+        "activar"
+      ).classList.add("oculto");
+
+      document.getElementById(
+        "inicio"
+      ).classList.remove("oculto");
+
+      escribirTitulo();
     }
+
+
+    /*
+      BOTÓN COMENZAR
+    */
+
+    function mostrarPregunta() {
+
+      document.getElementById(
+        "comenzar"
+      ).classList.add("oculto");
+
+      document.getElementById(
+        "pregunta"
+      ).classList.remove("oculto");
+    }
+
+
+    /*
+      BOTÓN SÍ
+    */
 
     function aceptar() {
-      const musica = document.getElementById("musica");
 
-      musica.play().catch(() => {
-        console.log("La música necesita interacción del usuario.");
-      });
+      document.getElementById(
+        "pregunta"
+      ).classList.add("oculto");
 
-      document.getElementById("pregunta").classList.add("oculto");
-      document.getElementById("juego").classList.remove("oculto");
+      document.getElementById(
+        "juego"
+      ).classList.remove("oculto");
     }
 
+
+    /*
+      BOTÓN NO
+    */
+
     function rechazar() {
-      document.getElementById("respuesta").textContent =
+
+      document.getElementById(
+        "respuesta"
+      ).textContent =
         "Está bien... todavía puedes pensarlo.";
 
       setTimeout(() => {
-        document.getElementById("respuesta").textContent = "";
+
+        document.getElementById(
+          "respuesta"
+        ).textContent = "";
+
       }, 2000);
     }
 
-    function alternarMusica() {
-      const musica = document.getElementById("musica");
-      const boton = document.getElementById("musicaBtn");
 
-      if (musica.paused) {
-        musica.play();
-        boton.textContent = "🔊 MÚSICA";
-      } else {
-        musica.pause();
-        boton.textContent = "🔇 MÚSICA";
-      }
-    }
+    /*
+      EL PRIMER TOQUE ACTIVA EL SONIDO
+    */
 
-    escribirTitulo();
+    document.getElementById(
+      "activar"
+    ).addEventListener(
+      "click",
+      empezarJuego
+    );
 
   </script>
 
 </body>
-</html>
+</html>    
