@@ -7,77 +7,93 @@
   <title>MEMORY.LOG</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
     body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: #000;
+    }
+
+    body {
+      min-height: 100vh;
       background: #000;
       color: #00ff66;
       font-family: "Courier New", monospace;
-      text-align: center;
+      overflow: hidden;
     }
 
     .pantalla {
       width: 100%;
       height: 100vh;
-
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      text-align: center;
+      padding: 25px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .oculto {
+      display: none !important;
     }
 
     h1 {
-      font-size: clamp(35px, 10vw, 60px);
-      text-shadow: 0 0 10px #00ff66;
+      font-size: clamp(30px, 8vw, 60px);
+      margin: 10px;
+      text-shadow:
+        0 0 5px #00ff66,
+        0 0 15px #00ff66;
+    }
+
+    h2 {
+      font-size: clamp(22px, 6vw, 40px);
+      margin: 10px;
+      text-shadow:
+        0 0 5px #00ff66,
+        0 0 12px #00ff66;
     }
 
     p {
-      font-size: 18px;
+      max-width: 900px;
+      font-size: clamp(16px, 4vw, 22px);
+      line-height: 1.7;
       text-shadow: 0 0 5px #00ff66;
     }
 
     button {
       background: #000;
       color: #00ff66;
-
       border: 2px solid #00ff66;
-
-      padding: 15px 30px;
-      margin-top: 20px;
-
+      padding: 14px 32px;
+      margin: 10px;
       font-family: "Courier New", monospace;
-      font-size: 20px;
-
+      font-size: 19px;
+      font-weight: bold;
       cursor: pointer;
-
-      box-shadow: 0 0 10px rgba(0,255,102,0.4);
+      text-shadow: 0 0 5px #00ff66;
+      box-shadow: 0 0 8px rgba(0, 255, 102, 0.35);
     }
 
     button:hover {
       background: #00ff66;
       color: #000;
-    }
-
-    #texto {
-      max-width: 800px;
-      padding: 20px;
-
-      line-height: 1.7;
-
-      min-height: 100px;
-    }
-
-    .oculto {
-      display: none;
+      box-shadow: 0 0 18px #00ff66;
     }
 
     .cursor {
       display: inline-block;
-
-      width: 9px;
-      height: 20px;
-
+      width: 10px;
+      height: 23px;
       background: #00ff66;
-
+      margin-left: 5px;
       animation: parpadear 0.8s infinite;
     }
 
@@ -86,82 +102,637 @@
         opacity: 0;
       }
     }
+
+    .interferencia {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.07;
+
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 3px,
+          #00ff66 4px
+        );
+    }
+
+    #activar {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: #000;
+    }
+
+    .texto-fase {
+      width: 100%;
+      max-width: 950px;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding: 15px;
+
+      scrollbar-color:
+        #00ff66
+        #000;
+    }
+
+    .texto-fase p {
+      min-height: 25px;
+    }
+
+    .pequeno {
+      font-size: 15px;
+      opacity: 0.8;
+    }
+
+    .pera {
+      font-size: 70px;
+      margin: 20px;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- PANTALLA INICIAL -->
 
-  <div id="inicio" class="pantalla">
+  <!-- =====================================
+       PANTALLA INICIAL
+  ====================================== -->
+
+  <div id="activar" class="pantalla">
 
     <h1>MEMORY.LOG</h1>
 
-    <p>ARCHIVO PERSONAL ENCONTRADO</p>
+    <p>
+      ARCHIVO PERSONAL ENCONTRADO
+    </p>
 
-    <p>Toca para iniciar</p>
-
-    <button onclick="iniciar()">
-      INICIAR
-    </button>
-
-  </div>
-
-
-  <!-- PANTALLA DEL JUEGO -->
-
-  <div id="juego" class="pantalla oculto">
-
-    <h1>NIVEL 1</h1>
-
-    <p id="texto"></p>
+    <p class="pequeno">
+      Toca para iniciar
+    </p>
 
     <span class="cursor"></span>
 
   </div>
 
 
+  <!-- =====================================
+       NIVEL 1
+  ====================================== -->
+
+  <div id="inicio" class="pantalla oculto">
+
+    <h1>NIVEL 1</h1>
+
+    <p>
+      INICIANDO JUEGO...
+    </p>
+
+    <button onclick="mostrarPregunta()">
+      COMENZAR
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       PREGUNTA
+  ====================================== -->
+
+  <div id="pregunta" class="pantalla oculto">
+
+    <h2>
+      ¿Quieres saber sobre mi vida?
+    </h2>
+
+    <div>
+
+      <button onclick="aceptar()">
+        SÍ
+      </button>
+
+      <button onclick="rechazar()">
+        NO
+      </button>
+
+    </div>
+
+    <p id="respuesta"></p>
+
+  </div>
+
+
+  <!-- =====================================
+       FASE 1
+  ====================================== -->
+
+  <div id="fase1" class="pantalla oculto">
+
+    <div class="texto-fase">
+
+      <h2>FASE 01 — MI INFANCIA</h2>
+
+      <p>
+        Todo comenzó el 27 de junio de 2014, el día en que comenzó mi historia
+      </p>
+
+      <p>
+        Ese día abrí los ojos por primera vez y descubrí, sin saberlo, un mundo completamente nuevo
+      </p>
+
+      <p>
+        Tomé mi primera porción de leche, vi por primera vez a mi madre y a mi padre, y también a mi hermano, quien estaba feliz de tenerme en su vida
+      </p>
+
+      <p>
+        Pasaron algunos años y llegó una nueva etapa: el prejardín
+      </p>
+
+      <p>
+        Fue allí donde conocí a una niña que se convirtió en mi primera amiga de la infancia
+      </p>
+
+      <p>
+        También conocí profesores a quienes llegué a querer mucho… y otros con los que no tuve la misma conexión
+      </p>
+
+    </div>
+
+    <button onclick="mostrarFase(2)">
+      CONTINUAR ▶
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       FASE 2
+  ====================================== -->
+
+  <div id="fase2" class="pantalla oculto">
+
+    <div class="texto-fase">
+
+      <h2>FASE 02 — CAMBIOS</h2>
+
+      <p>
+        Cuando comencé tercero de primaria, muchas cosas empezaron a cambiar. Algunas para bien y otras no tanto
+      </p>
+
+      <p>
+        Tercero fue un año que me costó mucho, pero no por temas económicos o escolares, sino por mis emociones
+      </p>
+
+      <p>
+        En ese momento no era una chica linda o bonita, y algunos compañeros comenzaron a burlarse de mi aspecto, de mi cara o de mi cabello
+      </p>
+
+      <p>
+        Además, una amiga que antes era importante para mí, Lina, cambió. Ya no era como antes; comenzó a manipularme y a hablar mal de mí
+      </p>
+
+      <p>
+        Después conocí a otra amiga que, en su momento, fue una gran compañera para mí. Me apoyaba en algunas situaciones, aunque no siempre
+      </p>
+
+      <p>
+        Aun así, muchas veces continuaba sintiéndome sola
+      </p>
+
+      <p>
+        Pero llegó cuarto de primaria, un entorno diferente
+      </p>
+
+      <p>
+        Me fui de aquel colegio y me trasladé a otro. Allí conocí nuevas personas y viví experiencias completamente diferentes
+      </p>
+
+      <p>
+        Allí conocí a Gabriela, una amiga que fue muy especial para mí en ese momento, además de Emmily y Valery
+      </p>
+
+      <p>
+        Éramos un grupo y poco a poco pude animarme más
+      </p>
+
+      <p>
+        También fue en ese colegio donde entré a la banda
+      </p>
+
+      <p>
+        Fue la primera vez que toqué una trompeta. Allí aprendí muchas cosas, conocí nuevas experiencias y nuevos entornos
+      </p>
+
+      <p>
+        En ese colegio también conocí lo que es ser migajera
+      </p>
+
+    </div>
+
+    <button onclick="mostrarFase(3)">
+      CONTINUAR ▶
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       FASE 3
+  ====================================== -->
+
+  <div id="fase3" class="pantalla oculto">
+
+    <div class="texto-fase">
+
+      <h2>FASE 03 — REGRESO</h2>
+
+      <p>
+        En quinto grado llegué al colegio de nuevo, esta vez con un cambio impactante para mí
+      </p>
+
+      <p>
+        Mi aspecto físico había cambiado mucho en torno a estatura, peso y cara
+      </p>
+
+      <p>
+        Solamente que yo odiaba mi anterior colegio por lo que me hicieron en tercer grado, por lo que la mayoría de veces los miraba con fastidio o les hablaba mal
+      </p>
+
+      <p>
+        Obviamente no duró mucho esa actitud, pero igualmente les guardaba distancia
+      </p>
+
+      <p>
+        Mayormente me hablaba con Lina, pero no mucho de la misma forma
+      </p>
+
+      <p>
+        En esos momentos llegó Taliana, otra amiga que me hizo adaptarme mejor al colegio
+      </p>
+
+      <p>
+        Un tiempo después, en ese mismo año, conocí a mi "primera" pareja
+      </p>
+
+      <p>
+        Todo avanzó muy bien, pero hubo algunos problemas, lo que hizo que mi ánimo bajara mucho
+      </p>
+
+      <p>
+        Terminamos por temas delicados
+      </p>
+
+      <p>
+        Hubo una época en la que de verdad estaba mal, pero no le dije a nadie sobre el tema
+      </p>
+
+      <p>
+        Continué de esa manera hasta después de vacaciones
+      </p>
+
+      <p>
+        Volví con mi pareja anterior, pero casi a finales de año volvimos a terminar
+      </p>
+
+      <p>
+        No voy a dar detalles de por qué, y aclaro que sí fue mucho terminar y volver, pero teníamos nuestras razones
+      </p>
+
+      <p>
+        Mis cambios emocionales volvieron y recaí de nuevo
+      </p>
+
+      <p>
+        Comencé a tener problemas con mi madre y mi padre, problemas que se volvieron muy frecuentes
+      </p>
+
+      <p>
+        Mi hermano tampoco se quedaba atrás, también discutíamos por temas personales
+      </p>
+
+      <p>
+        Y eso para mí era algo muy pesado
+      </p>
+
+    </div>
+
+    <button onclick="mostrarFase(4)">
+      CONTINUAR ▶
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       PAUSA
+  ====================================== -->
+
+  <div id="fase4" class="pantalla oculto">
+
+    <div class="texto-fase">
+
+      <h2>PAUSA — UN MENSAJE PARA TI</h2>
+
+      <p>
+        Bueno, sinceramente esto que te cuento es algo muy personal
+      </p>
+
+      <p>
+        No quiero que te sientas tal vez fastidiado por el texto o te sientas obligado a leerlo todo
+      </p>
+
+      <p>
+        Si ya no quieres continuar con mi historia simplemente la puedes dejar hasta aquí
+      </p>
+
+      <p>
+        Porque sinceramente no quiero obligarte a leer esto, tal vez algo que no querías leer o no sé
+      </p>
+
+      <p>
+        Pero quiero que sepas que para mí eres una gran amistad y gracias por estar conmigo este tiempo
+      </p>
+
+      <p>
+        Lo aprecio mucho ya que eres el único amigo que no me ha cambiado o me ha reemplazado
+      </p>
+
+      <p>
+        Quiero que seas mi mejor amigo por mucho más tiempo
+      </p>
+
+      <p>
+        Y si algún día me reemplazas…
+      </p>
+
+      <p>
+        te jalo las patas en la noche, ¿oíste? JAJAJA
+      </p>
+
+      <p>
+        En fin…
+      </p>
+
+      <p>
+        Continúa si quieres :)
+      </p>
+
+    </div>
+
+    <button onclick="mostrarFase(5)">
+      CONTINUAR ▶
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       FASE 5
+  ====================================== -->
+
+  <div id="fase5" class="pantalla oculto">
+
+    <div class="texto-fase">
+
+      <h2>FASE 05 — ACTUALIDAD</h2>
+
+      <p>
+        Llegamos a 2026, el año en el que estamos actualmente
+      </p>
+
+      <p>
+        Comienzo la escuela aún aburrida pero continuando con la escuela etc..
+      </p>
+
+      <p>
+        Vi a mi ex pareja de nuevo, algo incómodo para mí, luego me comencé a juntar con Taliana, mi amiga del año anterior
+      </p>
+
+      <p>
+        Luego conocí a otra chica que se llama Rosita, ella también fue mi amiga
+      </p>
+
+      <p>
+        Pero luego de un tiempo ese grupo de tres comenzó a terminar, ellas comenzaron a ignorarme más frecuentemente y llegó un punto en el que eso me desanimó bastante
+      </p>
+
+      <p>
+        De nuevo recaí emocionalmente
+      </p>
+
+      <p>
+        Estuve así, sin ganas de nada, pero aún animando a los demás
+      </p>
+
+      <p>
+        Permanecí de esa forma mucho tiempo, y es ahí donde volví a hablar contigo xd
+      </p>
+
+      <p>
+        Aunque no lo parezca siempre he estado así, sé que no lo demuestro pero en realidad soy un completo desorden por dentro
+      </p>
+
+      <p>
+        Tal vez no lo notaste, pero en realidad es así
+      </p>
+
+      <p>
+        Ahí tuve una relación virtual, duramos como dos meses y medio y terminamos por temas personales x2
+      </p>
+
+      <p>
+        Continué con los problemas frecuentes en mi casa, que sinceramente eso ya me traía muy agotada
+      </p>
+
+      <p>
+        Así que ahí fue cuando me fui a la finca donde mi Nona
+      </p>
+
+      <p>
+        Continué hablando contigo en mis vacaciones, mi estado de ánimo mejoró un poco pero aún había algo que continuaba molestándome
+      </p>
+
+      <p>
+        Eran mis primas
+      </p>
+
+      <p>
+        Ellas hablaban mal de mí a mis espaldas y tenía un primo el cual era con el único que me la pasaba
+      </p>
+
+      <p>
+        Ellas comenzaron a decir que supuestamente yo y él éramos pareja, cuando obviamente eso no era verdad ya que somos primos y había una diferencia de edad
+      </p>
+
+      <p>
+        Él me respetaba a mí y yo a él
+      </p>
+
+      <p>
+        Luego me tuve que ir a mi casa de nuevo, algo que en realidad me molestó, y mucho
+      </p>
+
+      <p>
+        No quería volver a ese lugar de nuevo, tuve que volver y regresé, aunque no tan bien
+      </p>
+
+      <p>
+        Llegó un punto en el que dejé de sentir dolor, felicidad, enojo, etc..
+      </p>
+
+      <p>
+        No sentía nada, pero sí podía fingirlo
+      </p>
+
+      <p>
+        Eso me molestaba y mucho, porque era un vacío todos los días
+      </p>
+
+      <p>
+        Estaba exhausta ya
+      </p>
+
+      <p>
+        Y pues supongo que llegamos a la actualidad :)
+      </p>
+
+    </div>
+
+    <button onclick="mostrarFase(6)">
+      DESBLOQUEAR EXTRA ▶
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       EXTRA
+  ====================================== -->
+
+  <div id="fase6" class="pantalla oculto">
+
+    <div class="texto-fase">
+
+      <h2>EXTRA — CONTENIDO DESBLOQUEADO</h2>
+
+      <div class="pera">
+        🍐
+      </div>
+
+      <p>
+        Si llegaste hasta aquí ponme una 🍐 en tu respuesta sobre el artículo/juego
+      </p>
+
+      <p>
+        Te agradezco mucho si llegaste hasta este punto, de verdad me esforcé mucho haciendo esto y traté de hacerlo lo mejor que pude
+      </p>
+
+      <p>
+        Graciasss :]
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- EFECTO DE INTERFERENCIA -->
+
+  <div class="interferencia"></div>
+
+
   <script>
 
-    let audioContext;
+    /* =====================================
+       AUDIO
+    ====================================== */
 
-    let musicaIniciada = false;
+    let audioContext = null;
+
+    let musicGain = null;
+
+    let musicStarted = false;
 
 
-    /* =========================
-       INICIAR AUDIO
-    ========================= */
+    /*
+      INICIAR AUDIO
+    */
 
     function iniciarAudio() {
 
-      audioContext =
-        new (
-          window.AudioContext ||
-          window.webkitAudioContext
-        )();
+      const AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext;
 
-      musicaIniciada = true;
+      if (!AudioContext) {
+        return;
+      }
 
-      musica();
+      if (!audioContext) {
 
+        audioContext =
+          new AudioContext();
+
+        musicGain =
+          audioContext.createGain();
+
+        /*
+          Volumen de la música
+        */
+
+        musicGain.gain.value = 0.12;
+
+        musicGain.connect(
+          audioContext.destination
+        );
+      }
+
+      /*
+        Algunos celulares suspenden
+        el audio automáticamente
+      */
+
+      if (
+        audioContext.state ===
+        "suspended"
+      ) {
+
+        audioContext.resume();
+      }
+
+      if (!musicStarted) {
+
+        musicStarted = true;
+
+        musica();
+      }
     }
 
 
-    /* =========================
-       MÚSICA SUAVE
-    ========================= */
+    /*
+      MÚSICA DEL JUEGO
+    */
 
     function musica() {
 
-      if (!musicaIniciada) {
+      if (!audioContext) {
         return;
       }
 
       const notas = [
+
         130.81,
         155.56,
         174.61,
+        155.56,
+
+        130.81,
+        116.54,
+        130.81,
         155.56
+
       ];
 
       notas.forEach(
@@ -173,14 +744,19 @@
           const volumen =
             audioContext.createGain();
 
-          oscilador.type = "triangle";
+          /*
+            Sonido suave y ambiental
+          */
+
+          oscilador.type =
+            "triangle";
 
           oscilador.frequency.value =
             frecuencia;
 
           const tiempo =
             audioContext.currentTime +
-            i * 1.2;
+            i * 0.6;
 
           volumen.gain.setValueAtTime(
             0,
@@ -188,41 +764,49 @@
           );
 
           volumen.gain.linearRampToValueAtTime(
-            0.045,
-            tiempo + 0.1
+            0.18,
+            tiempo + 0.08
           );
 
           volumen.gain.linearRampToValueAtTime(
             0,
-            tiempo + 1
+            tiempo + 0.52
           );
 
-          oscilador.connect(volumen);
+          oscilador.connect(
+            volumen
+          );
 
           volumen.connect(
-            audioContext.destination
+            musicGain
           );
 
-          oscilador.start(tiempo);
+          oscilador.start(
+            tiempo
+          );
 
           oscilador.stop(
-            tiempo + 1.05
+            tiempo + 0.55
           );
 
         }
       );
 
+
+      /*
+        Repetir la melodía
+      */
+
       setTimeout(
         musica,
         4800
       );
-
     }
 
 
-    /* =========================
-       SONIDO DE TECLADO
-    ========================= */
+    /*
+      SONIDO DE TECLADO
+    */
 
     function tecla() {
 
@@ -236,22 +820,25 @@
       const volumen =
         audioContext.createGain();
 
-      oscilador.type = "sine";
+      oscilador.type =
+        "sine";
 
       oscilador.frequency.value =
         550;
 
       volumen.gain.setValueAtTime(
-        0.025,
+        0.035,
         audioContext.currentTime
       );
 
       volumen.gain.exponentialRampToValueAtTime(
         0.001,
-        audioContext.currentTime + 0.04
+        audioContext.currentTime + 0.045
       );
 
-      oscilador.connect(volumen);
+      oscilador.connect(
+        volumen
+      );
 
       volumen.connect(
         audioContext.destination
@@ -262,39 +849,47 @@
       oscilador.stop(
         audioContext.currentTime + 0.05
       );
-
     }
 
 
-    /* =========================
-       ESCRITURA LENTA
-    ========================= */
+    /* =====================================
+       ESCRITURA
+       100 MILISEGUNDOS
+    ====================================== */
 
-    function escribir() {
+    function escribirTexto(
+      elemento,
+      texto
+    ) {
 
-      const texto =
-        "Iniciando archivo personal...";
-
-      const elemento =
-        document.getElementById(
-          "texto"
-        );
+      elemento.textContent = "";
 
       let posicion = 0;
+
 
       function siguiente() {
 
         if (
-          posicion >= texto.length
+          posicion >=
+          texto.length
         ) {
+
           return;
         }
 
         const caracter =
-          texto.charAt(posicion);
+          texto.charAt(
+            posicion
+          );
 
         elemento.textContent +=
           caracter;
+
+
+        /*
+          Sonido de teclado
+          cada dos letras
+        */
 
         if (
           caracter !== " " &&
@@ -302,49 +897,164 @@
         ) {
 
           tecla();
-
         }
 
         posicion++;
 
-        /*
-          150 ms por letra.
-          Escritura lenta y tranquila.
-        */
 
         setTimeout(
           siguiente,
-          150
+          100
         );
-
       }
 
-      siguiente();
 
+      siguiente();
     }
 
 
-    /* =========================
-       BOTÓN INICIAR
-    ========================= */
+    /* =====================================
+       ESCRIBIR FASE
+    ====================================== */
 
-    function iniciar() {
+    function escribirFase(
+      numero
+    ) {
+
+      const fase =
+        document.getElementById(
+          "fase" + numero
+        );
+
+      if (!fase) {
+        return;
+      }
+
+
+      const parrafos =
+        fase.querySelectorAll(
+          ".texto-fase p"
+        );
+
+
+      parrafos.forEach(
+        (parrafo) => {
+
+          if (
+            !parrafo.dataset.texto
+          ) {
+
+            parrafo.dataset.texto =
+              parrafo.textContent.trim();
+
+          }
+
+          parrafo.textContent =
+            "";
+
+        }
+      );
+
+
+      let indice = 0;
+
+
+      function siguienteParrafo() {
+
+        if (
+          indice >=
+          parrafos.length
+        ) {
+
+          return;
+        }
+
+
+        const parrafo =
+          parrafos[indice];
+
+        const texto =
+          parrafo.dataset.texto;
+
+
+        escribirTexto(
+          parrafo,
+          texto
+        );
+
+
+        /*
+          Tiempo de escritura
+          más una pequeña pausa
+        */
+
+        const tiempo =
+          texto.length * 100 + 700;
+
+
+        indice++;
+
+
+        setTimeout(
+          siguienteParrafo,
+          tiempo
+        );
+      }
+
+
+      siguienteParrafo();
+    }
+
+
+    /* =====================================
+       COMENZAR
+    ====================================== */
+
+    function empezarJuego() {
+
+      /*
+        IMPORTANTE:
+        El audio empieza aquí,
+        justo después del toque
+      */
 
       iniciarAudio();
 
-      document
-        .getElementById("inicio")
-        .classList.add("oculto");
 
       document
-        .getElementById("juego")
-        .classList.remove("oculto");
+        .getElementById(
+          "activar"
+        )
+        .classList.add(
+          "oculto"
+        );
 
-      escribir();
 
+      document
+        .getElementById(
+          "inicio"
+        )
+        .classList.remove(
+          "oculto"
+        );
     }
 
-  </script>
 
-</body>
-</html>
+    /* =====================================
+       MOSTRAR PREGUNTA
+    ====================================== */
+
+    function mostrarPregunta() {
+
+      document
+        .getElementById(
+          "inicio"
+        )
+        .classList.add(
+          "oculto"
+        );
+
+
+      document
+        .getElementById(
+          "pr
