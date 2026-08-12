@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>MEMORY.LOG</title>
 
   <style>
     body {
       margin: 0;
-      background: black;
+      background: #000;
       color: #00ff66;
-      font-family: monospace;
+      font-family: "Courier New", monospace;
       text-align: center;
     }
 
     .pantalla {
+      width: 100%;
       height: 100vh;
+
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -23,34 +26,325 @@
     }
 
     h1 {
-      font-size: 50px;
+      font-size: clamp(35px, 10vw, 60px);
       text-shadow: 0 0 10px #00ff66;
     }
 
+    p {
+      font-size: 18px;
+      text-shadow: 0 0 5px #00ff66;
+    }
+
     button {
-      background: black;
+      background: #000;
       color: #00ff66;
+
       border: 2px solid #00ff66;
+
       padding: 15px 30px;
-      font-family: monospace;
+      margin-top: 20px;
+
+      font-family: "Courier New", monospace;
       font-size: 20px;
+
+      cursor: pointer;
+
+      box-shadow: 0 0 10px rgba(0,255,102,0.4);
+    }
+
+    button:hover {
+      background: #00ff66;
+      color: #000;
+    }
+
+    #texto {
+      max-width: 800px;
+      padding: 20px;
+
+      line-height: 1.7;
+
+      min-height: 100px;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    .cursor {
+      display: inline-block;
+
+      width: 9px;
+      height: 20px;
+
+      background: #00ff66;
+
+      animation: parpadear 0.8s infinite;
+    }
+
+    @keyframes parpadear {
+      50% {
+        opacity: 0;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="pantalla">
+  <!-- PANTALLA INICIAL -->
+
+  <div id="inicio" class="pantalla">
 
     <h1>MEMORY.LOG</h1>
 
     <p>ARCHIVO PERSONAL ENCONTRADO</p>
 
-    <button>
-      COMENZAR
+    <p>Toca para iniciar</p>
+
+    <button onclick="iniciar()">
+      INICIAR
     </button>
 
   </div>
+
+
+  <!-- PANTALLA DEL JUEGO -->
+
+  <div id="juego" class="pantalla oculto">
+
+    <h1>NIVEL 1</h1>
+
+    <p id="texto"></p>
+
+    <span class="cursor"></span>
+
+  </div>
+
+
+  <script>
+
+    let audioContext;
+
+    let musicaIniciada = false;
+
+
+    /* =========================
+       INICIAR AUDIO
+    ========================= */
+
+    function iniciarAudio() {
+
+      audioContext =
+        new (
+          window.AudioContext ||
+          window.webkitAudioContext
+        )();
+
+      musicaIniciada = true;
+
+      musica();
+
+    }
+
+
+    /* =========================
+       MÚSICA SUAVE
+    ========================= */
+
+    function musica() {
+
+      if (!musicaIniciada) {
+        return;
+      }
+
+      const notas = [
+        130.81,
+        155.56,
+        174.61,
+        155.56
+      ];
+
+      notas.forEach(
+        (frecuencia, i) => {
+
+          const oscilador =
+            audioContext.createOscillator();
+
+          const volumen =
+            audioContext.createGain();
+
+          oscilador.type = "triangle";
+
+          oscilador.frequency.value =
+            frecuencia;
+
+          const tiempo =
+            audioContext.currentTime +
+            i * 1.2;
+
+          volumen.gain.setValueAtTime(
+            0,
+            tiempo
+          );
+
+          volumen.gain.linearRampToValueAtTime(
+            0.045,
+            tiempo + 0.1
+          );
+
+          volumen.gain.linearRampToValueAtTime(
+            0,
+            tiempo + 1
+          );
+
+          oscilador.connect(volumen);
+
+          volumen.connect(
+            audioContext.destination
+          );
+
+          oscilador.start(tiempo);
+
+          oscilador.stop(
+            tiempo + 1.05
+          );
+
+        }
+      );
+
+      setTimeout(
+        musica,
+        4800
+      );
+
+    }
+
+
+    /* =========================
+       SONIDO DE TECLADO
+    ========================= */
+
+    function tecla() {
+
+      if (!audioContext) {
+        return;
+      }
+
+      const oscilador =
+        audioContext.createOscillator();
+
+      const volumen =
+        audioContext.createGain();
+
+      oscilador.type = "sine";
+
+      oscilador.frequency.value =
+        550;
+
+      volumen.gain.setValueAtTime(
+        0.025,
+        audioContext.currentTime
+      );
+
+      volumen.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + 0.04
+      );
+
+      oscilador.connect(volumen);
+
+      volumen.connect(
+        audioContext.destination
+      );
+
+      oscilador.start();
+
+      oscilador.stop(
+        audioContext.currentTime + 0.05
+      );
+
+    }
+
+
+    /* =========================
+       ESCRITURA LENTA
+    ========================= */
+
+    function escribir() {
+
+      const texto =
+        "Iniciando archivo personal...";
+
+      const elemento =
+        document.getElementById(
+          "texto"
+        );
+
+      let posicion = 0;
+
+      function siguiente() {
+
+        if (
+          posicion >= texto.length
+        ) {
+          return;
+        }
+
+        const caracter =
+          texto.charAt(posicion);
+
+        elemento.textContent +=
+          caracter;
+
+        if (
+          caracter !== " " &&
+          posicion % 2 === 0
+        ) {
+
+          tecla();
+
+        }
+
+        posicion++;
+
+        /*
+          150 ms por letra.
+          Escritura lenta y tranquila.
+        */
+
+        setTimeout(
+          siguiente,
+          150
+        );
+
+      }
+
+      siguiente();
+
+    }
+
+
+    /* =========================
+       BOTÓN INICIAR
+    ========================= */
+
+    function iniciar() {
+
+      iniciarAudio();
+
+      document
+        .getElementById("inicio")
+        .classList.add("oculto");
+
+      document
+        .getElementById("juego")
+        .classList.remove("oculto");
+
+      escribir();
+
+    }
+
+  </script>
 
 </body>
 </html>
